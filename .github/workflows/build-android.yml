@@ -1,4 +1,4 @@
-name: Build Android APK (Embedded + Strategies)
+name: Build Android APK
 
 on:
   push:
@@ -13,12 +13,11 @@ on:
 
 env:
   GO_VERSION: '1.21'
-  ANDROID_API_LEVEL: '34'
   SING_BOX_VERSION: '1.10.4'
   GRADLE_VERSION: '8.6'
 
 jobs:
-  build-apk:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,79 +27,43 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
-      - name: Debug: Show proxy directory contents
-        run: |
-          echo "=== Files in proxy/ ==="
-          ls -la proxy/
-          echo "=== go.mod contents ==="
-          cat proxy/go.mod 2>/dev/null || echo "❌ go.mod NOT FOUND"
-          echo "=== go.sum exists? ==="
-          [ -f proxy/go.sum ] && echo "✅ go.sum found" || echo "❌ go.sum NOT FOUND"
-
-      - name: Build DPI Proxy (obfuscated)
+      - name: Build Go Proxy
         run: |
           cd proxy
-          if [ ! -f go.mod ]; then
-            echo "❌ ERROR: go.mod not found in proxy/"
-            exit 1
-          fi
           go mod tidy
           go mod download
           go mod verify
           mkdir -p ../android/app/src/main/assets
           GOOS=android GOARCH=arm64 CGO_ENABLED=0 go build \
-            -ldflags="-s -w -X main.version=${GITHUB_SHA::8}" \
+            -ldflags="-s -w" \
             -o ../android/app/src/main/assets/dpi-proxy .
           chmod +x ../android/app/src/main/assets/dpi-proxy
-          ls -lh ../android/app/src/main/assets/dpi-proxy
-          echo "✅ dpi-proxy built successfully"
+          echo "✅ dpi-proxy built"
 
       - name: Download sing-box
         run: |
           mkdir -p android/app/src/main/assets
-          curl -fSL -o sing-box.tar.gz \
-            "https://github.com/SagerNet/sing-box/releases/download/v${{ env.SING_BOX_VERSION }}/sing-box-${{ env.SING_BOX_VERSION }}-android-arm64.tar.gz"
-          tar -xzf sing-box.tar.gz -C android/app/src/main/assets \
-            --strip-components=1 sing-box-${{ env.SING_BOX_VERSION }}-android-arm64/sing-box
+          curl -fSL -o sb.tar.gz "https://github.com/SagerNet/sing-box/releases/download/v${{ env.SING_BOX_VERSION }}/sing-box-${{ env.SING_BOX_VERSION }}-android-arm64.tar.gz"
+          tar -xzf sb.tar.gz -C android/app/src/main/assets --strip-components=1
           chmod +x android/app/src/main/assets/sing-box
-          echo "✅ sing-box embedded"
+          echo "✅ sing-box ready"
 
-      - name: Setup Java 17
+      - name: Setup Java & Android
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '17'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          packages: 'platforms;android-34 build-tools;34.0.0'
-
-      - name: Setup Gradle
-        run: |
-          cd android
-          if [ ! -f gradlew ]; then
-            gradle wrapper --gradle-version ${{ env.GRADLE_VERSION }}
-          fi
-          chmod +x gradlew
+      - uses: android-actions/setup-android@v3
 
       - name: Build APK
         run: |
           cd android
-          echo "📦 Assets before build:"
-          ls -lh app/src/main/assets/
-          ./gradlew assembleDebug --no-daemon --stacktrace
-
-      - name: Verify APK
-        run: |
-          APK="android/app/build/outputs/apk/debug/app-debug.apk"
-          echo "📊 APK size: $(du -h $APK | cut -f1)"
-          echo "🔍 Checking embedded binaries:"
-          unzip -l "$APK" | grep -E "assets/(dpi-proxy|sing-box)" || echo "⚠️ Binaries not found"
+          if [ ! -f gradlew ]; then gradle wrapper --gradle-version ${{ env.GRADLE_VERSION }}; fi
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: zapret-masked-debug
+          name: zapret-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 30
