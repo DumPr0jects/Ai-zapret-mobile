@@ -8,8 +8,6 @@ import (
 	"io"
 	"log"
 	"net"
-	"os"
-	"strings"
 	"time"
 
 	utls "github.com/refraction-networking/utls"
@@ -31,6 +29,10 @@ var (
 var clientIDs = []utls.ClientHelloID{
 	utls.HelloChrome_83, utls.HelloChrome_70,
 	utls.HelloFirefox_63, utls.HelloRandomizedALPN,
+}
+
+func init() {
+	// Инициализация rand не нужна — math/rand использует время по умолчанию
 }
 
 func main() {
