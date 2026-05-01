@@ -1,0 +1,13 @@
+🗂 File Structure (12 tracked files)  ← отслеживаемые файлы в Git
+.github/workflows/build-android.yml
+android/app/src/main/assets/sing-box.json
+android/app/src/main/java/com/zapretmobile/core/ConnectionTester.kt
+android/app/src/main/java/com/zapretmobile/service/ZapretVpnService.kt
+android/app/src/main/java/com/zapretmobile/util/Constants.kt
+android/app/src/main/java/com/zapretmobile/util/Logger.kt
+proxy/main.go
+proxy/obfuscate/jitter.go
+proxy/strategies/fake_tls.go
+proxy/strategies/mixed.go
+proxy/strategies/padding.go
+proxy/strategies/split_sni.go
