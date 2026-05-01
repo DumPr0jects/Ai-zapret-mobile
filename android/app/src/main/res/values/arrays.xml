@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Стратегии дублируются здесь для совместимости со старыми версиями -->
+    <string-array name="strategy_ids">
+        <item>none</item>
+        <item>fake-tls</item>
+        <item>split-sni</item>
+        <item>split-http</item>
+        <item>ttl</item>
+        <item>desync-fake</item>
+        <item>delay</item>
+        <item>padding</item>
+        <item>mixed</item>
+    </string-array>
+    
+    <string-array name="strategy_names">
+        <item>❌ No Bypass</item>
+        <item>🎭 Fake TLS</item>
+        <item>✂️ Split SNI</item>
+        <item>✂️ Split HTTP</item>
+        <item>⏱ TTL Manip</item>
+        <item>🔄 Desync Fake</item>
+        <item>🐌 Random Delay</item>
+        <item>📦 Packet Padding</item>
+        <item>🎲 Mixed (Recommended)</item>
+    </string-array>
+</resources>
