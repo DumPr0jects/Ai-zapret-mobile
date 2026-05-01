@@ -1,0 +1,42 @@
+{
+  "log": { "level": "warn", "timestamp": false },
+  "dns": {
+    "servers": [
+      { "tag": "doh", "address": "https://1.1.1.1/dns-query", "strategy": "prefer_ipv4", "detour": "proxy" },
+      { "tag": "local", "address": "local", "detour": "direct" }
+    ],
+    "rules": [
+      { "outbound": "any", "server": "doh" },
+      { "clash_mode": "direct", "server": "local" }
+    ],
+    "independent_cache": true
+  },
+  "inbounds": [
+    {
+      "type": "tun",
+      "interface_name": "tun0",
+      "inet4_address": "172.19.0.1/30",
+      "auto_route": true,
+      "strict_route": true,
+      "stack": "system",
+      "mtu": 1500,
+      "dns_hijack": ["any:53"],
+      "sniff": true,
+      "sniff_override_destination": true
+    }
+  ],
+  "outbounds": [
+    { "type": "socks", "server": "127.0.0.1", "server_port": 1080, "tag": "proxy" },
+    { "type": "direct", "tag": "direct" },
+    { "type": "block", "tag": "block" }
+  ],
+  "route": {
+    "auto_detect_interface": true,
+    "final": "proxy",
+    "rules": [
+      { "protocol": "dns", "outbound": "dns-out" },
+      { "ip_cidr": ["127.0.0.0/8", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"], "outbound": "direct" },
+      { "domain": ["clash.razord.top", "yacd.metacubex.one"], "outbound": "direct" }
+    ]
+  }
+}
