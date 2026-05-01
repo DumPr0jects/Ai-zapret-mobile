@@ -1,110 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:padding="24dp" android:gravity="center">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp"
-        android:gravity="center_horizontal">
+    <TextView android:id="@+id/statusText" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="⏹ Ready" android:textSize="22sp" android:layout_marginBottom="24dp"/>
 
-        <!-- Заголовок -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="🔒 Zapret Mobile"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp"/>
+    <Spinner android:id="@+id/strategySpinner" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="DPI Bypass (No Root)"
-            android:textSize="14sp"
-            android:textColor="#666"
-            android:layout_marginBottom="24dp"/>
+    <Button android:id="@+id/btnStart" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="▶ Start VPN" android:backgroundTint="#4CAF50" android:textAllCaps="false" android:layout_marginBottom="12dp"/>
 
-        <!-- Статус -->
-        <TextView
-            android:id="@+id/status"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="⏹ Ready"
-            android:textSize="18sp"
-            android:gravity="center"
-            android:padding="12dp"
-            android:background="#F5F5F5"
-            android:layout_marginBottom="20dp"/>
+    <Button android:id="@+id/btnStop" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="⏹ Stop VPN" android:backgroundTint="#F44336" android:textAllCaps="false" android:layout_marginBottom="12dp"/>
 
-        <!-- Выбор стратегии -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="🎯 Bypass Strategy:"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp"/>
-
-        <Spinner
-            android:id="@+id/strategySpinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"/>
-
-        <TextView
-            android:id="@+id/strategyDesc"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="13sp"
-            android:textColor="#555"
-            android:layout_marginBottom="24dp"/>
-
-        <!-- Кнопки управления -->
-        <Button
-            android:id="@+id/btnStart"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="▶ Start VPN"
-            android:textAllCaps="false"
-            android:backgroundTint="#4CAF50"
-            android:layout_marginBottom="12dp"/>
-
-        <Button
-            android:id="@+id/btnStop"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="⏹ Stop VPN"
-            android:textAllCaps="false"
-            android:backgroundTint="#F44336"
-            android:enabled="false"
-            android:layout_marginBottom="12dp"/>
-
-        <Button
-            android:id="@+id/btnClear"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="🗑 Clear Downloaded Data"
-            android:textAllCaps="false"
-            android:backgroundTint="#FF9800"
-            android:layout_marginBottom="24dp"/>
-
-        <!-- Информация (исправлено: layout_marginTop="auto" → layout_weight="1" + spacer) -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="ℹ️ Requires Android 7.0+\nWorks without root via VpnService API"
-            android:textSize="12sp"
-            android:textColor="#888"
-            android:gravity="center"
-            android:paddingBottom="16dp"/>
-
-    </LinearLayout>
-</ScrollView>
+    <Button android:id="@+id/btnClear" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="🗑 Clear Data" android:backgroundTint="#FF9800" android:textAllCaps="false"/>
+</LinearLayout>
