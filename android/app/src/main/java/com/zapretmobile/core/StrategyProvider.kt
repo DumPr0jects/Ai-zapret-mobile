@@ -10,7 +10,8 @@ data class Strategy(
 )
 
 object StrategyProvider {
-    private val STRATEGIES = listOf(
+    // 🔧 ИСПРАВЛЕНО: публичное свойство (без private)
+    val ALL = listOf(
         Strategy("mixed", "🎲 Mixed", "Комбинация методов", listOf("--strategy=mixed")),
         Strategy("split-sni", "✂️ Split SNI", "Разделение на границе SNI", listOf("--strategy=split-sni")),
         Strategy("fake-tls", "🎭 Fake TLS", "Подделка TLS handshake", listOf("--strategy=fake-tls")),
@@ -18,17 +19,16 @@ object StrategyProvider {
         Strategy("none", "❌ No Bypass", "Прямое подключение", emptyList())
     )
 
-    fun getDefaultStrategy(): Strategy = STRATEGIES.first()
-    
-    fun getStrategy(id: String): Strategy? = STRATEGIES.find { it.id == id }
-    
+    fun getDefault(): Strategy = ALL.first()
+    fun get(id: String): Strategy? = ALL.find { it.id == id }
+
     fun getPreferredStrategy(context: Context): String {
         return context.getSharedPreferences("zapret_prefs", Context.MODE_PRIVATE)
-            .getString("preferred_strategy", getDefaultStrategy().id) ?: getDefaultStrategy().id
+            .getString("preferred_strategy", getDefault().id) ?: getDefault().id
     }
 
     fun buildProxyArgs(strategyId: String, assetsPath: String): List<String> {
-        val strategy = getStrategy(strategyId) ?: getDefaultStrategy()
+        val strategy = get(strategyId) ?: getDefault()
         return mutableListOf("--port=1080", "--log=false") + strategy.proxyArgs
     }
 
