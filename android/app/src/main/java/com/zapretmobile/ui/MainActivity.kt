@@ -14,6 +14,7 @@ import com.zapretmobile.core.StrategyProvider
 import com.zapretmobile.service.ZapretVpnService
 
 class MainActivity : AppCompatActivity() {
+    
     private var isRunning = false
     private lateinit var statusText: TextView
     private lateinit var spinner: Spinner
@@ -31,31 +32,55 @@ class MainActivity : AppCompatActivity() {
         btnStop = findViewById(R.id.btnStop)
         btnClear = findViewById(R.id.btnClear)
 
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, StrategyProvider.ALL.map { it.name })
+        // 🔧 ИСПРАВЛЕНО: используем публичный StrategyProvider.ALL
+        val adapter = ArrayAdapter(
+            this, 
+            android.R.layout.simple_spinner_dropdown_item, 
+            StrategyProvider.ALL.map { it.displayName }
+        )
         spinner.adapter = adapter
-        spinner.setSelection(StrategyProvider.ALL.indexOfFirst { it.id == StrategyProvider.load(this) })
+        
+        // Восстанавливаем сохранённую стратегию
+        val savedId = StrategyProvider.getPreferredStrategy(this)
+        val savedIdx = StrategyProvider.ALL.indexOfFirst { it.id == savedId }.coerceAtLeast(0)
+        spinner.setSelection(savedIdx)
+
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(p: AdapterView<*>, v: View?, pos: Int, id: Long) {
+                val sel = StrategyProvider.ALL[pos]
+                StrategyProvider.savePreferredStrategy(this@MainActivity, sel.id)
+            }
+            override fun onNothingSelected(p: AdapterView<*>) {}
+        }
 
         btnStart.setOnClickListener { startVpn() }
         btnStop.setOnClickListener { stopVpn() }
         btnClear.setOnClickListener { clearData() }
 
-        NotificationManager.createChannel(this)
+        NotificationManager.createNotificationChannel(this)
         updateUI()
     }
 
     private fun startVpn() {
         if (isRunning) return
+        
         if (!BinaryHandler.verifyAll(this)) {
             if (!BinaryHandler.extractAll(this)) {
                 Toast.makeText(this, "❌ Binaries extraction failed", Toast.LENGTH_LONG).show()
                 return
             }
         }
+        
         val sel = StrategyProvider.ALL[spinner.selectedItemPosition]
-        StrategyProvider.save(this, sel.id)
-        val intent = Intent(this, ZapretVpnService::class.java).putExtra("STRATEGY_ID", sel.id)
+        val intent = Intent(this, ZapretVpnService::class.java)
+            .putExtra("STRATEGY_ID", sel.id)
+        
         val vpnReq = VpnService.prepare(this)
-        if (vpnReq != null) startActivityForResult(vpnReq, 1) else onVpnResult(RESULT_OK)
+        if (vpnReq != null) {
+            startActivityForResult(vpnReq, 1)
+        } else {
+            onVpnResult(RESULT_OK)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -66,10 +91,15 @@ class MainActivity : AppCompatActivity() {
     private fun onVpnResult(code: Int) {
         if (code == RESULT_OK) {
             val sel = StrategyProvider.ALL[spinner.selectedItemPosition]
-            val i = Intent(this, ZapretVpnService::class.java).putExtra("STRATEGY_ID", sel.id)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(i) else startService(i)
+            val i = Intent(this, ZapretVpnService::class.java)
+                .putExtra("STRATEGY_ID", sel.id)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(i)
+            } else {
+                startService(i)
+            }
             isRunning = true
-            Toast.makeText(this, "▶ Started: ${sel.name}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "▶ Started: ${sel.displayName}", Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(this, "❌ VPN permission denied", Toast.LENGTH_SHORT).show()
         }
@@ -84,7 +114,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun clearData() {
         if (isRunning) stopVpn()
-        if (BinaryHandler.clearAll(this)) Toast.makeText(this, "✅ Cleared", Toast.LENGTH_SHORT).show()
+        if (BinaryHandler.clearAll(this)) {
+            Toast.makeText(this, "✅ Cleared", Toast.LENGTH_SHORT).show()
+        }
         updateUI()
     }
 
@@ -96,5 +128,8 @@ class MainActivity : AppCompatActivity() {
         btnClear.isEnabled = BinaryHandler.verifyAll(this)
     }
 
-    override fun onResume() { super.onResume(); updateUI() }
+    override fun onResume() {
+        super.onResume()
+        updateUI()
+    }
 }
